@@ -60,7 +60,7 @@ fi
 if [[ ! -z ${LAUNCH_URL+x} ]]
   then
     sleep 5
-    wget --post-data "url=$LAUNCH_URL" http://localhost:8080/launch/ >/dev/null 2>&1
+    wget --proxy off --post-data "url=$LAUNCH_URL" http://localhost:8080/launch/ >/dev/null 2>&1
 fi
 
 
