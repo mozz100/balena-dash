@@ -1,14 +1,19 @@
 # https://github.com/tomtaylor/currentcost/blob/master/currentcost.py
 
-import datetime
-import serial
-from xml.etree.cElementTree import fromstring
-import time
 import csv
+import datetime
+import os
 import signal
 import sys
+import time
+from xml.etree.cElementTree import fromstring
+
+import requests
+import serial
 
 serial = serial.Serial('/dev/ttyUSB0', 57600)
+MOZZWORLD_AUTH_TOKEN = os.environ.get("MOZZWORLD_AUTH_TOKEN")
+MOZZWORLD_URL_CURRENTCOST = os.environ.get("MOZZWORLD_URL_CURRENTCOST")
 
 class UTC(datetime.tzinfo):
     def utcoffset(self, dt):
@@ -42,3 +47,15 @@ while True:
     timestamp = utc_now_string()
     row = [timestamp, watts]
     print(row)
+    try:
+        resp = requests.post(
+            url=MOZZWORLD_URL_CURRENTCOST,
+            headers={"Authorization": f"Token {MOZZWORLD_AUTH_TOKEN}"},
+            json={
+                "series": 2,  # TODO series by key
+                "value": watts,
+                "timestamp": timestamp,
+            }
+        )
+    except requests.HTTPError as e:
+        print("HTTPError", e)
