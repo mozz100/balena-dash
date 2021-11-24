@@ -43,7 +43,7 @@ def send_to_influxdb(measurements):
     print(measurements)
     sequence = []
     for atime, watts in measurements:
-        ts = atime.timestamp() * 1000000000
+        ts = str(int(atime.timestamp() * 1000000000))
         line = f"power watts={watts} {ts}"
         sequence.append(line)
         print(line)
