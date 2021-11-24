@@ -1,11 +1,11 @@
 version: '2'
 services:
-  kiosk:
-    restart: always
-    build: ./kiosk
-    privileged: true
-    ports:
-      - 8080:8080
+  # kiosk:
+  #   restart: always
+  #   build: ./kiosk
+  #   privileged: true
+  #   ports:
+  #     - 8080:8080
   currentcost:
     restart: always
     build: ./currentcost
