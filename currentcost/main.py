@@ -22,6 +22,7 @@ INFLUXDB_ORG = os.environ.get("INFLUXDB_ORG")
 INFLUXDB_BUCKET = os.environ.get("INFLUXDB_BUCKET")
 INFLUXDB_URL = os.environ.get("INFLUXDB_URL", "https://eu-central-1-1.aws.cloud2.influxdata.com")
 INFLUXDB_MEASUREMENT_BATCH = int(os.environ.get("INFLUXDB_MEASUREMENT_BATCH", "10"))
+CURRENTCOST_TICKBEAT_URL = os.environ["CURRENTCOST_TICKBEAT_URL"]
 
 class UTC(datetime.tzinfo):
     def utcoffset(self, dt):
@@ -55,6 +56,8 @@ def send_to_influxdb(measurements):
         ) as client:
             write_api = client.write_api(write_options=SYNCHRONOUS)
             write_api.write(INFLUXDB_BUCKET, INFLUXDB_ORG, sequence)
+        # Hit tickbeat
+        requests.post(CURRENTCOST_TICKBEAT_URL)
     except Exception as e:
         print(e)
 
