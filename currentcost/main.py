@@ -88,6 +88,7 @@ while True:
                 "timestamp": timestamp,
             }
         )
+        resp.raise_for_status()
     except requests.HTTPError as e:
         print("HTTPError", e)
     
