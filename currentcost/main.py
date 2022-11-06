@@ -58,7 +58,7 @@ def send_to_influxdb(measurements):
             write_api = client.write_api(write_options=SYNCHRONOUS)
             write_api.write(INFLUXDB_BUCKET, INFLUXDB_ORG, sequence)
         # Hit tickbeat
-        requests.post(CURRENTCOST_TICKBEAT_URL, headers={"Authorization": "Bearer {CURRENTCOST_TICKBEAT_SECRET}"})
+        requests.post(CURRENTCOST_TICKBEAT_URL, headers={"Authorization": f"Bearer {CURRENTCOST_TICKBEAT_SECRET}"})
     except Exception as e:
         print(e)
 
