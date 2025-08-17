@@ -18,7 +18,7 @@ log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.DEBUG))
 
 logging.info("Opening serial port")
-serial = serial.Serial('/dev/ttyUSB0', 57600, timeout=5.0)
+serial_port = serial.Serial('/dev/ttyUSB0', 57600, timeout=5.0)
 logging.info("Serial port opened")
 
 MOZZWORLD_AUTH_TOKEN = os.environ.get("MOZZWORLD_AUTH_TOKEN")
@@ -77,7 +77,7 @@ signal.signal(signal.SIGTERM, signal_term_handler)
 
 measurements = []
 while True:
-    msg = serial.readline()
+    msg = serial_port.readline()
     if not msg:
         raise ValueError('Time out')
     xml = fromstring(msg)
