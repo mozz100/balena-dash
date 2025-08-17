@@ -14,7 +14,8 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import requests
 import serial
 
-logging.basicConfig(level=os.getenv("LOG_LEVEL", logging.DEBUG))
+log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
+logging.basicConfig(level=getattr(logging, log_level, logging.DEBUG))
 
 logging.info("Opening serial port")
 serial = serial.Serial('/dev/ttyUSB0', 57600, timeout=5.0)
