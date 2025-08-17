@@ -78,7 +78,10 @@ signal.signal(signal.SIGTERM, signal_term_handler)
 measurements = []
 while True:
     msg = serial_port.readline()
-    logging.debug("msg: '%s'", msg)
+    logging.debug("msg: %s", msg)
+    if len(msg) == 0:
+        logging.info("Empty msg")
+        continue
     if not msg:
         raise ValueError('Time out')
     xml = fromstring(msg)
