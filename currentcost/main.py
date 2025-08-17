@@ -2,6 +2,7 @@
 
 import csv
 import datetime
+import logging
 import os
 import signal
 import sys
@@ -13,7 +14,12 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import requests
 import serial
 
-serial = serial.Serial('/dev/ttyUSB0', 57600)
+logging.basicConfig(level=os.getenv("LOG_LEVEL", logging.DEBUG))
+
+logging.info("Opening serial port")
+serial = serial.Serial('/dev/ttyUSB0', 57600, timeout=5.0)
+logging.info("Serial port opened")
+
 MOZZWORLD_AUTH_TOKEN = os.environ.get("MOZZWORLD_AUTH_TOKEN")
 MOZZWORLD_URL_CURRENTCOST = os.environ.get("MOZZWORLD_URL_CURRENTCOST")
 
@@ -38,18 +44,19 @@ def utc_now_string():
     return datetime.datetime.now(UTC()).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def signal_term_handler(signal, frame):
+    logging.info("signal_term_handler. Exiting.")
     sys.exit(0)
 
 def send_to_influxdb(measurements):
-    print("send_to_influxdb")
-    print(measurements)
+    logging.info("send_to_influxdb: %s", measurements)
     sequence = []
     for atime, watts in measurements:
         ts = str(int(atime.timestamp() * 1000000000))
         line = f"power watts={watts} {ts}"
         sequence.append(line)
-        print(line)
+        logging.debug("appended to sequence: %s", line)
     try:
+        logging.info("Influx db starting")
         with InfluxDBClient(
             url=INFLUXDB_URL,
             token=INFLUXDB_TOKEN,
@@ -57,10 +64,13 @@ def send_to_influxdb(measurements):
         ) as client:
             write_api = client.write_api(write_options=SYNCHRONOUS)
             write_api.write(INFLUXDB_BUCKET, INFLUXDB_ORG, sequence)
+            logging.info("Influx db write complete")
         # Hit tickbeat
+        logging.info("Hitting tickbeat...")
         requests.post(CURRENTCOST_TICKBEAT_URL, headers={"Authorization": f"Bearer {CURRENTCOST_TICKBEAT_SECRET}"})
+        logging.info("Hit tickbeat")
     except Exception as e:
-        print(e)
+        logging.exception("Bad thing happened: %s", e)
 
 signal.signal(signal.SIGTERM, signal_term_handler)
 
@@ -71,14 +81,16 @@ while True:
         raise ValueError('Time out')
     xml = fromstring(msg)
     if xml.tag != 'msg':
+        logging.debug("xml.tag was not msg")
         continue
     if xml.find('hist'):
+        logging.debug("hist found")
         continue
     watts = int(xml.find('ch1').find('watts').text)
     timestamp = utc_now_string()
     row = [timestamp, watts]
     measurements.append([datetime.datetime.now(UTC()), watts])
-    print(row)
+    logging.info("row %s", row)
     try:
         resp = requests.post(
             url=MOZZWORLD_URL_CURRENTCOST,
@@ -91,7 +103,7 @@ while True:
         )
         resp.raise_for_status()
     except requests.HTTPError as e:
-        print("HTTPError", e)
+        logging.exception("HTTPError: %s", e)
     
     if len(measurements) >= INFLUXDB_MEASUREMENT_BATCH:
         send_to_influxdb(measurements)
