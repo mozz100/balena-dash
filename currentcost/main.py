@@ -18,7 +18,8 @@ log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.DEBUG))
 
 logging.info("Opening serial port")
-serial_port = serial.Serial('/dev/ttyUSB0', 57600, timeout=5.0)
+serial_timeout = float(os.getenv("SERIAL_TIMEOUT", "5.0"))
+serial_port = serial.Serial('/dev/ttyUSB0', 57600, timeout=serial_timeout)
 logging.info("Serial port opened")
 
 MOZZWORLD_AUTH_TOKEN = os.environ.get("MOZZWORLD_AUTH_TOKEN")
