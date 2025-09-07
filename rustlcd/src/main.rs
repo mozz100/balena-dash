@@ -28,7 +28,7 @@ fn main() {
         .expect("Error setting Ctrl+C handler");
     }
 
-    let mut port: Box<dyn Write> = if false {
+    let mut port: Box<dyn Write> = if true {
         // The serial port to connect to
         let port_name = "/dev/ttyACM0";
         let baud_rate = 9600;
