@@ -13,3 +13,7 @@ services:
   duckdns:
     restart: always
     build: ./duckdns
+  rustlcd:
+    restart: always
+    build: ./rustlcd
+    privileged: true

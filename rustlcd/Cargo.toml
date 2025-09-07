@@ -1,0 +1,8 @@
+[package]
+name = "rustlcd"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ctrlc = "3.4.7"
+serialport = "4.7.3"
